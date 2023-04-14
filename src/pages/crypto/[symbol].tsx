@@ -9,8 +9,8 @@ import { api } from "~/utils/api";
 const CryptoPage: NextPage = () => {
     const router = useRouter()
     const [currency, currencySymbol] = useCurrencySelectorStore(store => [store.currency, store.currencies.find(currency => currency.id === store.currency)?.symbol])
-    const getCryptoMetadataQuery = api.crypto.getCryptoMetadata.useQuery({symbol: router.query.symbol})
-    const getCryptoQuotesLatestQuery = api.crypto.getCryptoQuotesLatest.useQuery({symbol: router.query.symbol, convert: currency})
+    const getCryptoMetadataQuery = api.crypto.getCryptoMetadata.useQuery({symbol: router.query.symbol as string})
+    const getCryptoQuotesLatestQuery = api.crypto.getCryptoQuotesLatest.useQuery({symbol: router.query.symbol as string, convert: currency})
 
     const refresh = () => {
         getCryptoMetadataQuery.refetch()
