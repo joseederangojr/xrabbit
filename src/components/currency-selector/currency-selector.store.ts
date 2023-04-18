@@ -12,7 +12,7 @@ type CurrencySelectorStore = {
 };
 
 export const useCurrencySelectorStore = create<CurrencySelectorStore>(
-  (set, get) => ({
+  (set) => ({
     currency: "USD",
     currencies: [
       {

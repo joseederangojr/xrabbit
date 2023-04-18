@@ -1,3 +1,5 @@
+
+
 import { z } from "zod";
 
 import {
@@ -5,7 +7,6 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { getCryptoListingLatest, getCryptoMetadata, getCryptoQuotesLatest } from "~/services/crypto.api";
-
 
 export const crypto = createTRPCRouter({
   getCryptoListingLatest: publicProcedure
@@ -20,15 +21,27 @@ export const crypto = createTRPCRouter({
     }))
     .query(async ({ input }) => {
       const response = await getCryptoListingLatest(input)
-      return response?.data  as { status: Record<string, any>, data: any[]}
+      return response.data.data.map((crypto) => ({
+        id: crypto.id,
+        rank: crypto.cmc_rank,
+        symbol: crypto.symbol,
+        price: crypto.quote[input.convert].price,
+        last24HourChange: crypto.quote[input.convert].percent_change_24h,
+      }))
     }),
   getCryptoMetadata: publicProcedure
     .input(z.object({
-      symbol: z.string()
+      symbol: z.string(),
     }))
     .query(async ({input}) => {
       const response = await getCryptoMetadata(input)
-      return {status: response?.data?.status, data: response.data.data[input.symbol][0]} as { status: Record<string, any>, data: Record<any, any> }
+      const data = response.data.data?.[input.symbol]?.[0]
+      return {
+        name: data?.name ?? '',
+        logo: data?.logo ?? '',
+        description: data?.description ?? '',
+        symbol: data?.symbol ?? ''
+      }
     }),
     getCryptoQuotesLatest: publicProcedure
     .input(z.object({
@@ -37,6 +50,16 @@ export const crypto = createTRPCRouter({
     }))
     .query(async ({input}) => {
       const response = await getCryptoQuotesLatest(input)
-      return {status: response?.data?.status, data: response.data.data[input.symbol][0]} as { status: Record<string, any>, data: Record<any, any> }
+      const data = response.data.data?.[input.symbol]?.[0]
+      return  {
+        rank: data?.cmc_rank ?? 0,
+        price: data?.quote[input.convert]?.price ?? 0,
+        last24HourChange: data?.quote[input.convert]?.percent_change_24h ?? 0,
+        volume24Hour: data?.quote[input.convert]?.volume_24h ?? 0,
+        marketCap: data?.quote[input.convert]?.market_cap ?? 0,
+        totalSupply: data?.total_supply ?? 0,
+        maxSupply: data?.max_supply
+      }
     })
 });
+
